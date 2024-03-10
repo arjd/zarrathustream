@@ -1,0 +1,8 @@
+<Config>
+  <PostgresUser>postgres</PostgresUser>
+  <PostgresPassword>postgres</PostgresPassword>
+  <PostgresPort>5432</PostgresPort>
+  <PostgresHost>postgres</PostgresHost>
+  <PostgresMainDb>overseerr</PostgresMainDb>
+  <PostgresLogDb>overseerr_logs</PostgresLogDb>
+</Config>

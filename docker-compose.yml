@@ -1,0 +1,223 @@
+version: '3.8'
+
+x-common: &common
+  environment:
+    UMASK: "022"
+    PUID: "13000"
+    PGID: "13000"
+    TZ: Etc/UTC
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # - type: bind
+      #   source: ./.dockervolumes/postgres/data
+      #   target: /var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
+      - type: bind
+        source: ./.dockervolumes/postgres/init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+ 
+  beets:
+    image: lscr.io/linuxserver/beets
+    container_name: beets
+    volumes:
+      - beets:/config
+      - type: bind
+        source: ./.dockervolumes/beets/config.xml
+        target: /config/config.xml
+    ports:
+      - "127.0.0.1:8337:8337"
+    <<: *common
+
+  lidarr:
+    image: lscr.io/linuxserver/lidarr
+    container_name: lidarr
+    volumes:
+      - lidarr:/config
+      - type: bind
+        source: ./.dockervolumes/lidarr/config.xml
+        target: /config/config.xml
+    ports:
+      - "127.0.0.1:8686:8686"
+    <<: *common
+
+  # overseerr:
+  #   image: lscr.io/linuxserver/overseerr
+  #   container_name: overseerr
+  #   volumes:
+  #     - type: bind
+  #       source: ./.dockervolumes/overseerr/
+  #       target: /config
+  #   ports:
+  #     - "127.0.0.1:5055:5055"
+  #   <<: *common
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr
+    container_name: prowlarr
+    volumes:
+      - prowlarr:/config
+      - type: bind
+        source: ./.dockervolumes/prowlarr/config.xml
+        target: /config/config.xml
+    ports:
+      - "127.0.0.1:9696:9696"
+    <<: *common
+
+  radarr:
+    image: lscr.io/linuxserver/radarr
+    container_name: radarr
+    volumes:
+      - radarr:/config
+      - type: bind
+        source: ./.dockervolumes/radarr/config.xml
+        target: /config/config.xml
+      # - type: bind
+      #   source: ./.dockervolumes/scripts/radarr/custom-services.d/
+      #   target: /custom-services.d
+      # - type: bind
+      #   source: ./.dockervolumes/scripts/radarr/custom-cont-init.d/
+      #   target: /custom-cont-init.d
+    ports:
+      - "127.0.0.1:7878:7878"
+    <<: *common
+
+  readarr:
+    image: lscr.io/linuxserver/readarr:develop
+    container_name: readarr
+    volumes:
+      - readarr:/config
+      - type: bind
+        source: ./.dockervolumes/readarr/config.xml
+        target: /config/config.xml
+    ports:
+      - "127.0.0.1:8787:8787"
+    <<: *common
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr
+    container_name: sonarr
+    volumes:
+      - sonarr:/config
+      - type: bind
+        source: ./.dockervolumes/sonarr/config.xml
+        target: /config/config.xml
+      # - type: bind
+      #   source: ./.dockervolumes/scripts/sonarr/custom-services.d/
+      #   target: /custom-services.d
+      # - type: bind
+      #   source: ./.dockervolumes/scripts/sonarr/custom-cont-init.d/
+      #   target: /custom-cont-init.d
+    ports:
+      - "127.0.0.1:8989:8989"
+    <<: *common
+
+  deluge:
+    image: lscr.io/linuxserver/deluge
+    container_name: deluge
+    volumes:
+      - deluge:/config
+      - type: bind
+        source: ./.dockervolumes/deluge/config.xml
+        target: /config/config.xml
+    <<: *common
+
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd
+    container_name: sabnzbd
+    volumes:
+      - sabnzbd:/config
+      - type: bind
+        source: ./.dockervolumes/sabnzbd/config.xml
+        target: /config/config.xml
+    <<: *common
+
+  # plex:
+  #   image: lscr.io/linuxserver/plex
+  #   container_name: plex
+  #   volumes:
+  #     - type: bind
+  #       source: ./.dockervolumes/plex/
+  #       target: /config
+  #   <<: *common
+
+  # flaresolverr:
+  #   image: ghcr.io/flaresolverr/flaresolverr
+  #   container_name: flaresolverr
+  #   environment:
+  #     - LOG_LEVEL=info
+  #     - LOG_HTML=false
+  #     - CAPTCHA_SOLVER=none
+  #   ports:
+  #     -127.0.0.1: 8191:8191
+  #   <<: *common
+
+  # freshrss:
+  #   image: lscr.io/linuxserver/freshrss
+  #   container_name: freshrss
+  #   volumes:
+  #     - .dockervolumes/freshrss:/config
+  #     - type: bind
+  #       source: ./.dockervolumes/.dockervolumes/freshrss/config.xml
+  #       target: /config/config.xml
+  #   environment:
+  #     - LISTEN=4040
+  #   ports:
+  #     -127.0.0.1: 4040:4040
+  #   <<: *common
+
+  # heimdall:
+  #   image: lscr.io/linuxserver/heimdall
+  #   container_name: heimdall
+  #   volumes:
+  #     - .dockervolumes/heimdall:./config
+  #   ports:
+  #     -127.0.0.1: 80:80
+  #     - 443:443
+  #   <<: *common
+
+  # tdarr:
+  #   container_name: tdarr
+  #   image: ghcr.io/haveagitgat/tdarr
+  #   network_mode: bridge
+  #   ports:
+  #     -127.0.0.1: 8265:8265
+  #     - 8266:8266
+  #   environment:
+  #     - serverIP=0.0.0.0
+  #     - serverPort=8266
+  #     - webUIPort=8265
+  #     - internalNode=true
+  #     - inContainer=true
+  #     - ffmpegVersion=6
+  #     - nodeName=MyInternalNode
+  #     - NVIDIA_DRIVER_CAPABILITIES=all
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #   volumes:
+  #     - /docker/tdarr/server:/app/server
+  #     - /docker/tdarr/configs:/app/configs
+  #     - /docker/tdarr/logs:/app/logs
+  #     - /media:/media
+  #     - /transcode_cache:/temp
+  #   <<: *common
+
+
+volumes:
+  beets:
+  lidarr:
+  prowlarr:
+  radarr:
+  readarr:
+  sonarr:
+  deluge:
+  sabnzbd:
+  postgres:
